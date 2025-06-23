@@ -76,7 +76,26 @@ export async function seedDefaultChartOfAccounts(businessId: string) {
   console.log("✔️ Default chart of accounts seeded");
 }
 
+export async function setupDefaultTaxTypes(businessId: string) {
+  const defaultTaxes = [
+    { taxName: "VAT", taxCode: "VAT", taxRate: 19.25 },
+    { taxName: "Withholding Tax", taxCode: "WHT", taxRate: 5.5 },
+    { taxName: "0%", taxCode: "ZERO", taxRate: 0 },
+    // Add other Cameroon-specific defaults
+  ];
 
+  return await prisma.$transaction(
+    defaultTaxes.map(tax =>
+      prisma.taxType.create({
+        data: {
+          businessId,
+          ...tax,
+          isActive: true,
+        },
+      })
+    )
+  );
+}
 
 /**
  * Seeds an OHADA-compliant Chart of Accounts for a business

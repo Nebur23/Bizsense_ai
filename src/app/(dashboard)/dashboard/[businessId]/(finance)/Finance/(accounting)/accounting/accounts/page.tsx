@@ -16,7 +16,7 @@ export default async function ChartOfAccountsPage() {
         <h1 className='text-3xl font-bold'>Chart of Accounts</h1>
 
         <div className='flex gap-2'>
-          <ImportCOADialog businessId='business-1' />
+          <ImportCOADialog />
           <ExportCOAButton coaData={data} />
           <AddAccountDialog />
         </div>

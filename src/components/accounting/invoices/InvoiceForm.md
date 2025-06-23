@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
-import { createInvoice } from "@/actions/accounting/create";
+import { createInvoice } from "@/actions/accounting/invoices";
 
 const invoiceSchema = z.object({
   customerId: z.string().min(1, "Customer is required"),

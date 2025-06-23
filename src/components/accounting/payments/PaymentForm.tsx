@@ -21,9 +21,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { MobileMoneyDialog } from "./MobileMoneyDialog";
 import { createPayment } from "@/actions/accounting/payments";
 import { Textarea } from "@/components/ui/textarea";
+import { MobileMoneyDialog } from "../MobileMoneyDialog";
 
 const paymentSchema = z.object({
   paymentType: z.string().min(1, "Payment type is required"),

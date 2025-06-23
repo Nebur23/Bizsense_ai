@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { Business } from "@/types";
 import { headers } from "next/headers";
-import { seedDefaultChartOfAccounts } from "../seed-main";
+import { seedDefaultChartOfAccounts, setupDefaultTaxTypes } from "../seed-main";
 
 export default async function CreateBusiness(data: Business): Promise<{
   statusCode: number;
@@ -41,6 +41,8 @@ export default async function CreateBusiness(data: Business): Promise<{
 
     //seed default chart of accounts
     await seedDefaultChartOfAccounts(business.id);
+
+    await setupDefaultTaxTypes(business.id);
 
     return {
       statusCode: 201,

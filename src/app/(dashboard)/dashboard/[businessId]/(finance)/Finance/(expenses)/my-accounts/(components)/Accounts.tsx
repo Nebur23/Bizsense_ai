@@ -7,6 +7,7 @@ import { AccountCardShimmer } from "./account-card-shimmer";
 import { CreateAccountDrawer } from "@/components/common/create-account-drawer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
+import { Account } from "@/types";
 
 const AccountGrid = () => {
   const { isPending, data: accounts } = useQuery({

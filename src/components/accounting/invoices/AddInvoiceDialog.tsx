@@ -8,7 +8,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { AddInvoiceForm } from "./AddInvoiceForm";
+//import { AddInvoiceForm } from "./AddInvoiceForm";
 import { useState } from "react";
 
 export function AddInvoiceDialog() {
@@ -26,7 +26,7 @@ export function AddInvoiceDialog() {
             <DialogDescription>Select customer and add items</DialogDescription>
           </DialogHeader>
 
-          <AddInvoiceForm onSuccess={() => setOpen(false)} />
+          {/* <AddInvoiceForm onSuccess={() => setOpen(false)} /> */}
         </DialogContent>
       </Dialog>
     </>

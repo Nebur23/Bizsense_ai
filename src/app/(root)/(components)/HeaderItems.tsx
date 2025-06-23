@@ -12,9 +12,10 @@ interface Props {
   session: Session;
   name: string;
   email: string;
+  businessId: string;
 }
 
-const HeaderItems = ({ link, session, name, email }: Props) => {
+const HeaderItems = ({ link, session, name, email, businessId }: Props) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navigation = [
@@ -45,6 +46,7 @@ const HeaderItems = ({ link, session, name, email }: Props) => {
           {session ? (
             <div className='flex flex-row items-center gap-2'>
               <UserDropdown
+                businessId={businessId}
                 session={JSON.parse(JSON.stringify(session))}
                 name={name}
                 email={email}
@@ -98,6 +100,7 @@ const HeaderItems = ({ link, session, name, email }: Props) => {
               {session ? (
                 <div className='flex flex-row items-center gap-2'>
                   <UserDropdown
+                    businessId={businessId}
                     session={JSON.parse(JSON.stringify(session))}
                     name={name}
                     email={email}

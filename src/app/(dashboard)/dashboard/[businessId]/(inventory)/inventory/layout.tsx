@@ -15,7 +15,7 @@ export default async function DashBoardLayout({
   params,
 }: Readonly<{
   children: React.ReactNode;
-  params: { businessId: string };
+  params: Promise<{ businessId: string }>;
 }>) {
   const { businessId } = await params;
   const [session] = await Promise.all([

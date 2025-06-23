@@ -12,7 +12,7 @@ import TransactionTable from "../(components)/transaction-table";
 export default async function AccountPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const accountData = await getAccountWithTransactions((await params).id);
 

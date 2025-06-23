@@ -2,14 +2,14 @@
 
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { AccountType } from "@prisma/client";
+import {  PaymentMethod } from "@prisma/client";
 import { headers } from "next/headers";
 
 
 
 export async function createAccount(data: {
   name: string;
-  type: AccountType;
+  type: PaymentMethod;
   provider: string;
   accountNumber?: string | null;
   balance: number;
@@ -69,7 +69,7 @@ export async function createAccount(data: {
         name,
         type,
         provider,
-        accountNumber,
+        accountNumber : accountNumber as string,
         balance,
         isDefault,
         currency,

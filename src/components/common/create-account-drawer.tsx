@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
 import { useState } from "react";
@@ -36,6 +38,7 @@ import { Switch } from "@/components/ui/switch";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SubmitButton } from "./SubmitButton";
 import { createAccount } from "@/actions/accounts/create";
+import { CreateAccount } from "@/types";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -69,7 +72,7 @@ export function CreateAccountDrawer({
 
   const createMutation = useMutation({
     mutationFn: async (data: CreateAccount) => {
-      return createAccount(data);
+      return createAccount(data as any);
     },
     onSuccess: response => {
       queryClient.invalidateQueries({ queryKey: ["accounts"] });

@@ -15,6 +15,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateDefaultAccount } from "@/actions/accounts/update";
 import { useParams } from "next/navigation";
 import { formatMoney } from "@/lib/utils";
+import { Account } from "@/types";
 
 export function AccountCard({ account }: { account: Account }) {
   const { name, type, balance, id, isDefault, currency } = account;

@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { getFirstName } from "@/lib/utils";
+import { HeaderBoxProps } from "@/types";
 import { headers } from "next/headers";
 
 const HeaderBox = async ({
