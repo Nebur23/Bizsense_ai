@@ -18,8 +18,6 @@ async function main() {
   console.log("Created account types");
 }
 
-
-
 main()
   .catch(e => {
     console.error(e);
