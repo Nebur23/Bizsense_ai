@@ -1,0 +1,95 @@
+Remaining Tasks to Complete Core Module 
+1. Finalize Journal Entry Reusability Across Modules  
+
+    Auto-create journal entries from all financial operations
+    Ensure consistency with ChartOfAccounts
+    Support audit trail per transaction
+     
+
+2. Add Recurring Invoice Support  
+
+    Weekly/Monthly/Custom recurring invoices
+    Auto-generate invoice based on template
+    Auto-journal entry for each cycle
+     
+
+3. Add Bulk Payment Application  
+
+    Apply multiple payments to multiple invoices at once
+    Auto-update balances and statuses
+    Track via journal entries
+     
+
+4. Improve Invoice Status History  
+
+    Store status changes with timestamps
+    Show full history in UI
+    Trigger alerts when overdue
+     
+
+5. Build Full Purchase Invoice Module  
+
+    Create purchase invoice form
+    Auto-link to suppliers
+    Auto-create journal entries
+     
+
+6. Implement Purchase-to-Pay Workflow  
+
+    PO → Purchase Invoice → Payment → GL update
+    Supplier payment tracking
+    Integration with inventory (COGS)
+     
+
+7. Integrate with Inventory (COGS)  
+
+    When product is sold → auto-create COGS line item
+    Link sales/purchase to chart of accounts
+    Update inventory value on hand
+     
+
+8. Import Bank Statements (CSV/XAF Banks)  
+
+    Support CSV upload for BICEC, UBA, etc.
+    Parse columns: Date, Amount, Description
+    Map to existing transactions or flag mismatches
+     
+
+9. Reconciliation UI  
+
+    Match imported lines with GL entries
+    Highlight unmatched items
+    Flag potential fraud or errors
+     
+
+10. Generate Transaction Report Per Account  
+
+    Filter by date, type, account
+    Export to PDF/Excel
+    Include mobile money logs
+     
+
+11. (Still Missing) Build Financial Reports  
+
+    Profit & Loss (P&L)
+    Balance Sheet
+    Trial Balance
+    General Ledger Summary
+    Cash Flow Statement
+     
+
+This list covers the full scope of a modern accounting module , especially for SMBs in Cameroon. 
+
+
+
+
+// ------inventory
+
+✅Generating the low stock alert badge 
+✅ Creating the physical count form 
+✅ Building the inventory dashboard 
+
+    ✅ Generating the Product Variants UI 
+    ✅ Creating the low stock alert badge 
+    ✅ Building the physical count form 
+     
