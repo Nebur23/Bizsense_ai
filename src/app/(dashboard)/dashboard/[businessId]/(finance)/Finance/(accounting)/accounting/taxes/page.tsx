@@ -9,7 +9,7 @@ import { Suspense } from "react";
 export default async function TaxSettingsPage() {
   const data = await getTaxTypes();
   return (
-    <div className='space-y-6 p-6'>
+    <div className='space-y-6 p-6 mt-10'>
       <div className='flex justify-between items-center'>
         <h1 className='text-2xl font-bold'>Tax Settings</h1>
         <AddTaxTypeDialog />

@@ -1,0 +1,156 @@
+[
+    {
+        "id": 1,
+        "name": "Adamawa",
+        "country_id": 38,
+        "country_code": "CM",
+        "country_name": "Cameroon",
+        "state_code": "AD",
+        "type": "Region",
+        "latitude": "7.37378630",
+        "longitude": "13.37161410"
+    },
+    {
+        "id": 2,
+        "name": "Centre",
+        "country_id": 38,
+        "country_code": "CM",
+        "country_name": "Cameroon",
+        "state_code": "CE",
+        "type": "Region",
+        "latitude": "4.64484600",
+        "longitude": "11.73150580"
+    },
+    {
+        "id": 7,
+        "name": "East",
+        "country_id": 38,
+        "country_code": "CM",
+        "country_name": "Cameroon",
+        "state_code": "ES",
+        "type": "Region",
+        "latitude": "4.23122450",
+        "longitude": "13.91035240"
+    },
+    {
+        "id": 8,
+        "name": "Far North",
+        "country_id": 38,
+        "country_code": "CM",
+        "country_name": "Cameroon",
+        "state_code": "EN",
+        "type": "Region",
+        "latitude": "11.23326670",
+        "longitude": "14.39964770"
+    },
+    {
+        "id": 9,
+        "name": "Littoral",
+        "country_id": 38,
+        "country_code": "CM",
+        "country_name": "Cameroon",
+        "state_code": "LT",
+        "type": "Region",
+        "latitude": "4.17511580",
+        "longitude": "10.21849520"
+    },
+    {
+        "id": 10,
+        "name": "North",
+        "country_id": 38,
+        "country_code": "CM",
+        "country_name": "Cameroon",
+        "state_code": "NO",
+        "type": "Region",
+        "latitude": "9.38289260",
+        "longitude": "13.91035240"
+    },
+    {
+        "id": 11,
+        "name": "Northwest",
+        "country_id": 38,
+        "country_code": "CM",
+        "country_name": "Cameroon",
+        "state_code": "NW",
+        "type": "Region",
+        "latitude": "6.33265280",
+        "longitude": "10.58845270"
+    },
+    {
+        "id": 12,
+        "name": "South",
+        "country_id": 38,
+        "country_code": "CM",
+        "country_name": "Cameroon",
+        "state_code": "SU",
+        "type": "Region",
+        "latitude": "2.64774460",
+        "longitude": "11.73150580"
+    },
+    {
+        "id": 13,
+        "name": "Southwest",
+        "country_id": 38,
+        "country_code": "CM",
+        "country_name": "Cameroon",
+        "state_code": "SW",
+        "type": "Region",
+        "latitude": "5.44768350",
+        "longitude": "9.94707220"
+    },
+    {
+        "id": 14,
+        "name": "West",
+        "country_id": 38,
+        "country_code": "CM",
+        "country_name": "Cameroon",
+        "state_code": "OU",
+        "type": "Region",
+        "latitude": "5.44768350",
+        "longitude": "10.58845270"
+    },
+    {
+        "id": 3,
+        "name": "Lagos",
+        "country_id": 161,
+        "country_code": "NG",
+        "country_name": "Nigeria",
+        "state_code": "LA",
+        "type": "State",
+        "latitude": "6.52437930",
+        "longitude": "3.37920570"
+    },
+    {
+        "id": 4,
+        "name": "Abuja",
+        "country_id": 161,
+        "country_code": "NG",
+        "country_name": "Nigeria",
+        "state_code": "FC",
+        "type": "Capital Territory",
+        "latitude": "9.05785450",
+        "longitude": "7.49508450"
+    },
+    {
+        "id": 5,
+        "name": "Gauteng",
+        "country_id": 204,
+        "country_code": "ZA",
+        "country_name": "South Africa",
+        "state_code": "GP",
+        "type": "Province",
+        "latitude": "-26.27075200",
+        "longitude": "28.11226790"
+    },
+    {
+        "id": 6,
+        "name": "Western Cape",
+        "country_id": 204,
+        "country_code": "ZA",
+        "country_name": "South Africa",
+        "state_code": "WC",
+        "type": "Province",
+        "latitude": "-33.22779790",
+        "longitude": "21.85685860"
+    }
+]

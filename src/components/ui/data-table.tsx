@@ -32,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./select";
+import { Search } from "lucide-react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -67,12 +68,15 @@ export function DataTable<TData, TValue>({
     <div>
       <div className='flex items-center py-4'>
         {/* Search Bar */}
-        <Input
-          placeholder='Search ...'
-          value={globalFilter ?? ""}
-          onChange={e => setGlobalFilter(e.target.value)}
-          className='max-w-sm'
-        />
+        <div className="relative w-72 mr-4">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder='Search ...'
+            value={globalFilter ?? ""}
+            onChange={e => setGlobalFilter(e.target.value)}
+            className='pl-8'
+          />
+        </div>
 
         {/* Filter Selectors */}
         <div className='flex gap-2 flex-wrap'>
@@ -82,8 +86,14 @@ export function DataTable<TData, TValue>({
                 <div key={column.id} className='flex items-center gap-1'>
                   {column.columnDef.meta?.filterVariant === "select" && (
                     <Select
-                      onValueChange={value => column.setFilterValue(value)}
-                      value={column.getFilterValue() as string}
+                      onValueChange={value => {
+                        if (value === 'all') {
+                          column.setFilterValue(undefined)
+                        } else {
+                          column.setFilterValue(value)
+                        }
+                      }}
+                      value={(column.getFilterValue() as string) ?? 'all'}
                     >
                       <SelectTrigger className='h-8 w-[200px]'>
                         <SelectValue
@@ -91,13 +101,16 @@ export function DataTable<TData, TValue>({
                         />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value='all'>All</SelectItem>
                         {Array.from(
                           new Set(data.map((item: any) => item[column.id]))
-                        ).map(value => (
-                          <SelectItem key={value} value={value as string}>
-                            {value}
-                          </SelectItem>
-                        ))}
+                        )
+                          .filter(value => value !== null && value !== "")
+                          .map(value => (
+                            <SelectItem key={value} value={value as string}>
+                              {value}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                   )}

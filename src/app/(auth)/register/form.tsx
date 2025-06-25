@@ -32,11 +32,11 @@ const TenantFform = () => {
   });
 
   async function onSubmit(values: z.infer<typeof authSchema>) {
-    toast(
-      <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
-        <code className='text-white'>{JSON.stringify(values, null, 2)}</code>
-      </pre>
-    );
+    // toast(
+    //   <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
+    //     <code className='text-white'>{JSON.stringify(values, null, 2)}</code>
+    //   </pre>
+    // );
 
     const { email, password, name } = values as {
       email: string;
@@ -63,6 +63,7 @@ const TenantFform = () => {
         },
         onError: ctx => {
           // display the error message
+          console.log("registration error", ctx.error);
           toast.error(ctx.error.message);
         },
       }

@@ -16,12 +16,12 @@ const Page = async () => {
 
   if (!session) redirect("/signin");
   return (
-    <div className='h-screen flex items-center justify-center'>
-      <div className='max-w-xl w-full flex flex-col mx-auto justify-center items-center'>
+    <div className='min-h-screen flex items-center justify-center'>
+      <div className='max-w-xl w-full flex flex-col mx-auto justify-center items-center pt-7'>
         <Logo />
-        <h1 className='font-geist-sans text-xl w-full font-semibold p-3 sm:p-0 mt-8 text-left'>
+        {/* <h1 className='font-geist-sans text-xl w-full font-semibold p-3 sm:p-0 mt-8 text-left'>
           Business Details
-        </h1>
+        </h1> */}
 
         <MyForm />
       </div>

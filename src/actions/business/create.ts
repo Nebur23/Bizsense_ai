@@ -1,12 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use server";
 
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { Business } from "@/types";
 import { headers } from "next/headers";
 import { seedDefaultChartOfAccounts, setupDefaultTaxTypes } from "../seed-main";
+//import { Business } from "@prisma/client";
 
-export default async function CreateBusiness(data: Business): Promise<{
+export default async function CreateBusiness(data: any): Promise<{
   statusCode: number;
   message: string;
   businessId: string;
@@ -18,7 +20,7 @@ export default async function CreateBusiness(data: Business): Promise<{
     const userId = session?.user.id;
     if (!userId) throw new Error("Unauthorized");
 
-    const { name, type, id } = data;
+    const { name, type, id, phone, location, email, website, city } = data;
     if (!name || !type || !id) {
       return {
         statusCode: 403,
@@ -32,10 +34,20 @@ export default async function CreateBusiness(data: Business): Promise<{
     });
     if (!user) throw new Error("User not found");
 
+    console.log("biz data", data);
+
+    const country = location[0];
+    const region = location[1];
     const business = await prisma.business.update({
       where: { id },
       data: {
         type,
+        location: `${region},${country}`,
+        phone,
+        email,
+        website,
+        city,
+        region,
       },
     });
 

@@ -36,11 +36,11 @@ const TenantFform = () => {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof authSchema>) {
-    toast(
-      <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
-        <code className='text-white'>{JSON.stringify(values, null, 2)}</code>
-      </pre>
-    );
+    // toast(
+    //   <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
+    //     <code className='text-white'>{JSON.stringify(values, null, 2)}</code>
+    //   </pre>
+    // );
 
     const { email, password, rememberMe } = values as {
       email: string;
@@ -76,6 +76,8 @@ const TenantFform = () => {
           form.reset();
         },
         onError: ctx => {
+          console.log("signin error", ctx.error);
+
           if (ctx.error.status === 403) {
             toast.error("Please verify your email address");
           } else {

@@ -12,9 +12,9 @@ export default async function DashBoardLayout({
   params,
 }: Readonly<{
   children: React.ReactNode;
-  params: { businessId: string };
+  params: Promise<{ businessId: string }>;
 }>) {
-  const businessId = params.businessId;
+  const { businessId } = await params;
   //const { businessId } = await params;
   const [session] = await Promise.all([
     auth.api.getSession({
