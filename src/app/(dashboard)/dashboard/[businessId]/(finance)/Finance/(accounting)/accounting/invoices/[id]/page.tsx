@@ -16,7 +16,7 @@ export default async function InvoiceDetailsPage({
   //const statusHistory = await getInvoiceStatusHistory(params.id);
 
   return (
-    <div className='space-y-6 p-6'>
+    <div className='space-y-6 p-6 mt-10'>
       <div className='flex justify-between items-center'>
         <h1 className='text-2xl font-bold'>Invoice #{invoice.invoiceNumber}</h1>
         <div className='space-x-2'>

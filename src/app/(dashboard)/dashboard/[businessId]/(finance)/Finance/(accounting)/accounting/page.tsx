@@ -6,19 +6,17 @@ import { formatCurrency } from "@/lib/utils";
 import {
   getReceivablesSummary,
   getPayablesSummary,
-  getCashFlowChartData,
 } from "@/actions/accounting/report";
 import { getAiCashFlowPredictions } from "@/actions/accounting/ai";
 import { Badge } from "@/components/ui/badge";
-import { CashFlowChart } from "@/components/common/CashFlowChart";
+import CashFlowForecast from "@/components/common/CashFlowLine";
 
 export default async function AccountingDashboardPage() {
-  const [receivables, payables, aiPredictions, cashFlowData] =
+  const [receivables, payables, aiPredictions] =
     await Promise.all([
       getReceivablesSummary(),
       getPayablesSummary(),
       getAiCashFlowPredictions(),
-      getCashFlowChartData(),
     ]);
 
   return (
@@ -26,7 +24,7 @@ export default async function AccountingDashboardPage() {
       {/* Header */}
       <div className='flex justify-between items-center'>
         <h1 className='text-2xl font-bold'>Accounting Dashboard</h1>
-        <div className='space-x-2'>
+        {/* <div className='space-x-2'>
           <Link
             href='/accounting/invoices'
             className='text-sm text-blue-600 hover:underline'
@@ -39,7 +37,7 @@ export default async function AccountingDashboardPage() {
           >
             View All Payments →
           </Link>
-        </div>
+        </div> */}
       </div>
 
       {/* Summary Cards */}
@@ -68,7 +66,7 @@ export default async function AccountingDashboardPage() {
 
         {/* Net Cash Flow Forecast */}
         <Card className='p-4'>
-          <h3 className='text-sm font-medium'>AI Forecast (Next 7 Days)</h3>
+          <h3 className='text-sm font-medium'>AI Forecast </h3>
           <p className='text-2xl font-bold'>
             {formatCurrency(aiPredictions.forecast?.netCashFlow || 0)}
           </p>
@@ -97,13 +95,14 @@ export default async function AccountingDashboardPage() {
       </div>
 
       {/* Cash Flow Chart */}
-      <Card className='p-6'>
+      {/* <Card className='p-6'>
         <h2 className='font-semibold mb-4'>Cash Flow Forecast</h2>
         <CashFlowChart data={cashFlowData} />
-      </Card>
+      </Card> */}
+        <CashFlowForecast />
 
       {/* Cash Flow Forecast Chart */}
-      <Card className='p-6'>
+      {/* <Card className='p-6'>
         <h2 className='font-semibold mb-4'>Cash Flow Forecast</h2>
         <div className='space-y-2'>
           {aiPredictions.forecast?.upcomingPayments.map((payment, i) => (
@@ -126,7 +125,7 @@ export default async function AccountingDashboardPage() {
             </div>
           ))}
         </div>
-      </Card>
+      </Card> */}
 
       {/* Overdue Invoices */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
@@ -142,7 +141,7 @@ export default async function AccountingDashboardPage() {
                 </tr>
               </thead>
               <tbody className='divide-y divide-gray-100'>
-                {receivables.invoices.map(inv => (
+                {receivables.overdueInvoices.map(inv => (
                   <tr key={inv.id}>
                     <td className='px-4 py-2 font-medium'>
                       <Link
@@ -241,7 +240,7 @@ export default async function AccountingDashboardPage() {
           <div className='flex justify-between items-center mb-4'>
             <h3 className='font-semibold'>Recent Payments</h3>
             <Link
-              href='/accounting/payments'
+              href='accounting/payments'
               className='text-sm text-blue-600 hover:underline'
             >
               View all

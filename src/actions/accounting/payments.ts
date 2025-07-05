@@ -5,8 +5,15 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { generateNextJournalEntryNumber } from "./helper";
+import { JournalEntryLineInput } from "./journalEntry";
 
 export async function createPayment(data: any, selectedAccountId?: string) {
+  console.log(
+    "Creating payment with data:",
+    data,
+    "selectedAccountId:",
+    selectedAccountId
+  );
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session?.user) throw new Error("Unauthorized");
@@ -19,6 +26,7 @@ export async function createPayment(data: any, selectedAccountId?: string) {
     if (!user || !user.organizationId) {
       throw new Error("User businessId not found");
     }
+
     const businessId = user.organizationId;
 
     // Validate required fields
@@ -31,23 +39,23 @@ export async function createPayment(data: any, selectedAccountId?: string) {
     const [arAccount, salesAccount, vatAccount, mobileMoneyAccount, apAccount] =
       await Promise.all([
         prisma.chartOfAccounts.findFirst({
-          where: { businessId, accountCode: "105", isActive: true },
+          where: { businessId, accountCode: "201", isActive: true }, // Accounts Receivable
           select: { id: true },
         }),
         prisma.chartOfAccounts.findFirst({
-          where: { businessId, accountCode: "401", isActive: true },
+          where: { businessId, accountCode: "401", isActive: true }, // Sales Revenue
           select: { id: true },
         }),
         prisma.chartOfAccounts.findFirst({
-          where: { businessId, accountCode: "202", isActive: true },
+          where: { businessId, accountCode: "202", isActive: true }, // VAT Collected
           select: { id: true },
         }),
         prisma.chartOfAccounts.findFirst({
-          where: { businessId, accountCode: "103", isActive: true },
+          where: { businessId, accountCode: "103", isActive: true }, // Mobile Money Account
           select: { id: true },
         }),
         prisma.chartOfAccounts.findFirst({
-          where: { businessId, accountCode: "201", isActive: true },
+          where: { businessId, accountCode: "201", isActive: true }, // Accounts Payable
           select: { id: true },
         }),
       ]);
@@ -61,13 +69,18 @@ export async function createPayment(data: any, selectedAccountId?: string) {
     )
       throw new Error("Missing one or more required accounts");
 
-    const customer = await prisma.customer.findFirst({
-      where: { id: data.customerId, businessId },
-    });
+    // Get customer info if available
+    let customer = null;
+    if (data.customerId) {
+      customer = await prisma.customer.findFirst({
+        where: { id: data.customerId, businessId },
+      });
+    }
 
-    // Start transaction
+    // Start transaction block
     const result = await prisma.$transaction(
       async tx => {
+        // Step 1: Create Payment Record
         const payment = await tx.payment.create({
           data: {
             businessId,
@@ -89,9 +102,9 @@ export async function createPayment(data: any, selectedAccountId?: string) {
           },
         });
 
-        // Create mobile money transaction if applicable
+        // Step 2: Create Mobile Money Transaction (if applicable)
         if (data.paymentMethod === "MOBILE_MONEY" && selectedAccountId) {
-          await prisma.mobileMoneyTransaction.create({
+          await tx.mobileMoneyTransaction.create({
             data: {
               accountId: selectedAccountId,
               paymentId: payment.id,
@@ -99,22 +112,14 @@ export async function createPayment(data: any, selectedAccountId?: string) {
                 data.paymentType === "Receipt" ? "RECEIVE" : "SEND",
               amount: data.amount,
               recipientNumber: data.reference || "",
-              reference: data.notes || "",
               status: "Success",
               transactionDate: new Date(),
             },
           });
         }
 
-        interface JournalEntryLine {
-          accountId: string;
-          debitAmount: number;
-          creditAmount: number;
-          description: string;
-          reference?: string;
-        }
-
-        let lines: JournalEntryLine[] = [];
+        // Step 3: Create Journal Entry
+        let lines: JournalEntryLineInput[] = [];
 
         if (data.paymentType === "Receipt") {
           lines = [
@@ -122,7 +127,7 @@ export async function createPayment(data: any, selectedAccountId?: string) {
               accountId: mobileMoneyAccount.id,
               creditAmount: data.amount,
               debitAmount: 0,
-              description: `Received from ${customer?.name || "Unknown"}`,
+              description: `Received via ${data.paymentMethod}`,
             },
             {
               accountId: arAccount.id,
@@ -131,7 +136,7 @@ export async function createPayment(data: any, selectedAccountId?: string) {
               description: `Payment for invoice ${data.invoiceId || ""}`,
             },
           ];
-        } else if (data.paymentType === "Payment") {
+        } else if (data.paymentType === "PAYMENT") {
           lines = [
             {
               accountId: apAccount.id,
@@ -143,7 +148,7 @@ export async function createPayment(data: any, selectedAccountId?: string) {
               accountId: mobileMoneyAccount.id,
               creditAmount: data.amount,
               debitAmount: 0,
-              description: `Payment #${payment.paymentNumber}`,
+              description: `Outgoing payment #${payment.paymentNumber}`,
             },
           ];
         }
@@ -182,35 +187,47 @@ export async function createPayment(data: any, selectedAccountId?: string) {
           })),
         });
 
+        // Step 4: Create Transaction Record (for AI/ML module)
+        const transactionDescription =
+          data.paymentType === "Receipt"
+            ? `Customer payment received - ${customer?.name || "Cash Sale"}`
+            : `Supplier payment - ${data.supplierName || "Unknown"}`;
+
+        await tx.transaction.create({
+          data: {
+            businessId,
+            type: data.paymentType === "Receipt" ? "SALE" : "EXPENSE",
+            amount: data.paymentType === "Receipt" ? data.amount : -data.amount,
+            description: transactionDescription,
+            date: new Date(),
+            accountId: mobileMoneyAccount.id,
+            //categoryId:
+            // data.paymentType === "Receipt" ? "cat-sale" : "cat-expense",
+            paymentId: payment.id,
+            ...(data.invoiceId && { invoiceId: data.invoiceId }),
+            reference: payment.paymentNumber,
+          },
+        });
+
+        // Step 5: Audit log
         await tx.auditLog.create({
           data: {
             businessId,
             userId,
             action: "CREATE",
-            tableName: "JournalEntry",
-            recordId: journalEntry.id,
-            newValues: JSON.stringify(journalEntry),
+            tableName: "Payment",
+            recordId: payment.id,
+            newValues: JSON.stringify(payment),
           },
         });
 
         return payment;
       },
       {
-        maxWait: 5000, // Keep short for responsiveness
-        timeout: 8000, // Reasonable for journal+payment
+        maxWait: 5000,
+        timeout: 8000,
       }
     );
-
-    await prisma.auditLog.create({
-      data: {
-        businessId,
-        userId,
-        action: "CREATE",
-        tableName: "Payment",
-        recordId: result.id,
-        newValues: JSON.stringify(result),
-      },
-    });
 
     revalidatePath("/accounting/payments");
 
@@ -364,7 +381,7 @@ export async function applyBulkPayment(data: any) {
       });
 
       // Auto-create journal entry
-     // const cashAccountId = "acc-103"; // Mobile money account
+      // const cashAccountId = "acc-103"; // Mobile money account
       //const receivableAccountId = "acc-201";
 
       // await createManualJournalEntry({

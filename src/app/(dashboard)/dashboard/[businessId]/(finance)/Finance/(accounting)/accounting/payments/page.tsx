@@ -8,12 +8,14 @@ export default async function PaymentsPage() {
   const data = await getPayments();
 
   return (
-    <div className='space-y-6 p-6'>
+    <div className='space-y-6 p-6 mt-10'>
       <div className='flex justify-between items-center'>
         <h1 className='text-2xl font-bold'>Payments</h1>
 
         <Link href='payments/new'>
-          <Button>Add New Payment</Button>
+          <Button variant='outline' className='cursor-pointer'>
+            Add New Payment
+          </Button>
         </Link>
       </div>
       <DataTable columns={columns} data={data} />

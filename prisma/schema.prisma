@@ -6,10 +6,10 @@ generator client {
 }
 
 datasource db {
-  //provider = "sqlite"
-  provider = "postgresql"
+  provider = "sqlite"
+  //provider = "postgresql"
 
-  directUrl = env("DIRECT_URL")
+  //directUrl = env("DIRECT_URL")
 
   url      = env("DATABASE_URL")
 }
@@ -227,25 +227,36 @@ model AccountTransaction {
 }
 
 model Transaction {
-  id                  String                   @id @default(cuid())
-  type                TransactionType
-  amount              Float
-  description         String?
-  date                DateTime                 @default(now())
-  categoryId          String?
-  category            Category?                @relation(fields: [categoryId], references: [id])
-  businessId          String
-  business            Business                 @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  customerId          String?
-  accountTransactions AccountTransaction[] // Link to account transactions
-  // AI-Powered Tagging and Classification
+  id               String   @id @default(cuid())
+  type             TransactionType // SALE, EXPENSE, TRANSFER, etc.
+  amount           Float
+  description      String?
+  date             DateTime @default(now())
+  businessId       String
+  accountId        String?  // Link to ChartOfAccounts
+  categoryId       String?
+  reference        String?  // e.g., "INV-YDE-001", "PAY-001"
+  invoiceId        String?
+  paymentId        String?
+
+  // Relations
+  business         Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  account          ChartOfAccounts?  @relation(fields: [accountId], references: [id])
+  category         Category?         @relation(fields: [categoryId], references: [id])
+  invoice          Invoice?          @relation(fields: [invoiceId], references: [id])
+  payment          Payment?          @relation(fields: [paymentId], references: [id])
+
+  // For AI/ML integration
   aiPredictedCategory String?
-  aiConfidenceScore   Float?
-  // Performance metrics relation
-  performanceMetricId String?
-  performanceMetric   PerformanceMetric?       @relation(fields: [performanceMetricId], references: [id])
-  createdAt           DateTime                 @default(now())
-  updatedAt           DateTime                 @updatedAt
+  aiConfidenceScore Float?
+  isProcessed     Boolean @default(false) // Whether used in ML training
+
+  // Relations
+  performanceMetrics PerformanceMetric[]
+  accountTransactions AccountTransaction[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model Category {
@@ -328,7 +339,7 @@ model ProductVariant {
   product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   variantName   String
   sku           String   @unique
-  barcode       String?  @unique
+  barcode       String?  @unique 
   price         Float
   cost          Float
   image         String? 
@@ -584,19 +595,22 @@ model Invoice {
   recurringType   RecurringType? // Daily/Weekly/Monthly/Yearly
   nextDueDate     DateTime?
   recurringParentId String?        // For child invoices from template
-  recurringTemplate Invoice?       @relation("InvoiceToRecurringTemplate", fields: [recurringParentId], references: [id])
-  children          Invoice[]      @relation("InvoiceToRecurringTemplate")
 
   // Relations
   business           Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
   customer    Customer      @relation(fields: [customerId], references: [id])
   order       SalesOrder?   @relation(fields: [orderId], references: [id])
+  recurringTemplate Invoice?       @relation("InvoiceToRecurringTemplate", fields: [recurringParentId], references: [id])
+  children          Invoice[]      @relation("InvoiceToRecurringTemplate")
+  
   items       InvoiceItem[]
   payments    Payment[]
+  transactions Transaction[] // One-to-many relationship
 
   @@unique([businessId, invoiceNumber])
   @@map("invoices")
 }
+
 
 model InvoiceItem {
   id          String  @id @default(cuid())
@@ -741,6 +755,7 @@ model ChartOfAccounts {
 
   @@unique([businessId, accountCode])
   @@map("chart_of_accounts")
+  Transaction Transaction[]
 }
 
 model AccountType {
@@ -773,6 +788,7 @@ model JournalEntry {
 
   @@unique([businessId, entryNumber])
   @@map("journal_entries")
+  Payment Payment[]
 }
 
 model JournalEntryLine {
@@ -809,6 +825,7 @@ model Payment {
   notes             String?
   isDeleted         Boolean  @default(false)
   createdAt         DateTime @default(now())
+  journalEntryId    String?
 
   // Relations
   business           Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
@@ -816,6 +833,10 @@ model Payment {
   supplier        Supplier?                @relation(fields: [supplierId], references: [id])
   invoice         Invoice?                 @relation(fields: [invoiceId], references: [id])
   purchaseInvoice PurchaseInvoice?         @relation(fields: [purchaseInvoiceId], references: [id])
+  journalEntry   JournalEntry?    @relation(fields: [journalEntryId], references: [id])
+  
+  // Related transactions (one-to-many)
+  transactions    Transaction[]
   mobileMoneyTransactions MobileMoneyTransaction[]
 
   @@unique([businessId, paymentNumber])

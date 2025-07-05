@@ -135,7 +135,7 @@ export const columns: ColumnDef<Product>[] = [
           <div className='font-medium text-gray-900'>{product.name}</div>
           <div className='text-sm text-gray-500'>{product.description}</div>
           <div className='flex items-center space-x-2'>
-            {product.productType === "Product" ? (
+            {product.productType === "PRODUCT" ? (
               <span className='inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800'>
                 <Package className='w-3 h-3 mr-1' />
                 Product

@@ -93,7 +93,7 @@ export async function getReceivablesSummary() {
   const invoices = await prisma.invoice.findMany({
     where: {
       businessId,
-      status: { not: "Paid" },
+      //status: { not: "Paid" },
       // dueDate: { lte: new Date() },
     },
     include: {
@@ -107,11 +107,11 @@ export async function getReceivablesSummary() {
   const total = invoices.reduce((sum, inv) => sum + inv.balance, 0);
 
   const overdue = invoices.filter(
-    inv => inv.dueDate < new Date() && inv.balance > 0
+    inv => inv.dueDate < new Date() && inv.balance > 0 && inv.status !== "Paid"
   );
   const overdueCount = overdue.length;
 
-  console.log("receivable invoices", invoices);
+  //console.log("receivable invoices", invoices);
 
   return {
     total,
@@ -155,15 +155,27 @@ export async function getPayablesSummary() {
   );
   const overdueCount = overdue.length;
 
+  const payments = await prisma.payment.findMany({
+    where: {
+      businessId,
+      // paymentType: "Payment",
+      paymentDate: { lte: new Date() },
+    },
+    orderBy: {
+      paymentDate: "desc",
+    },
+  });
+
   return {
     total,
     overdueCount,
-    payments: overdue.slice(0, 3).map(inv => ({
+    payments: payments.slice(0, 3).map(inv => ({
       id: inv.id,
-      paymentNumber: inv.invoiceNumber,
-      method: "Bank",
-      amount: inv.balance,
-      type: "Payment",
+      paymentNumber: inv.paymentNumber,
+      method: inv.paymentMethod,
+      amount: inv.amount,
+      paymentDate: inv.paymentDate,
+      type: inv.paymentType,
     })),
   };
 }

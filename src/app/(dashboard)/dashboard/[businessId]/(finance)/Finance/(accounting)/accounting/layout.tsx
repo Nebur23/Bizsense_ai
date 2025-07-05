@@ -29,7 +29,6 @@ export default async function DashBoardLayout({
 
   if (!session) redirect("/signin");
 
-  console.log("session accounting", session);
 
   const id = session?.user.id;
 

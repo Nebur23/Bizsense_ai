@@ -3,7 +3,7 @@ import { JournalEntryTable } from "@/components/accounting/journals/JournalEntry
 
 export default function JournalPage() {
   return (
-    <div className='space-y-6 p-6'>
+    <div className='space-y-6 p-6 mt-10'>
       <div className='flex justify-between items-center'>
         <h1 className='text-2xl font-bold'>General Journal </h1>
 

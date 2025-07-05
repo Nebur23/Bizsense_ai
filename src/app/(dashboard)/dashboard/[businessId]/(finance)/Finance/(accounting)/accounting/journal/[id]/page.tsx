@@ -20,7 +20,7 @@ export default async function JournalEntryPage({
   );
 
   return (
-    <div className='space-y-6 p-6'>
+    <div className='space-y-6 p-6 mt-10'>
       <div className='flex justify-between items-center'>
         <h1 className='text-xl font-bold'>
           Journal Entry: {journalEntry?.number} - {journalEntry?.date}

@@ -132,6 +132,8 @@ export async function getProductWithVariants(productId: string) {
 
 // app/api/products/create.ts
 export async function createProduct(data: CreateProductInput) {
+  console.log("Submitting enhanced product data:", data);
+
   try {
     const session = await auth.api.getSession({
       headers: await headers(), // you need to pass the headers object.
@@ -180,162 +182,159 @@ export async function createProduct(data: CreateProductInput) {
       if (!taxType) throw new Error("Tax type not found");
     }
 
-    return await prisma.$transaction(async prisma => {
-      // Create the base product
-      const product = await prisma.product.create({
-        data: {
+    const totalStock = (data.variants ?? []).reduce(
+      (sum, variant) => sum + (variant.stockQuantity || 0),
+      0
+    );
+
+    // Get accounts before transaction to reduce DB calls inside
+    const [inventoryAccount, cogsAccount] = await Promise.all([
+      prisma.chartOfAccounts.findFirst({
+        where: {
           businessId,
-          name: data.name,
-          description: data.description,
-          sku: data.sku,
-          productCode: data.productCode,
-          productType: data.productType,
-          unitOfMeasure: data.unitOfMeasure,
-          sellingPrice: data.price,
-          costPrice: data.cost || 0,
-          trackInventory: data.trackInventory ?? false,
-          maxStockLevel: data.maxStockLevel || 0,
-          defaultTaxTypeId: data.defaultTaxTypeId,
-          categoryId: data.categoryId,
-          reorderLevel: data.reorderLevel || 0,
+          accountCode: "104",
           isActive: true,
-          image: data.image ?? null,
+          accountType: { name: "Asset" },
         },
-        include: {
-          category: true,
-          defaultTax: true,
-        },
-      });
-
-      // Create variants if provided
-      if (data.variants && data.variants.length > 0) {
-        await prisma.productVariant.createMany({
-          data: data.variants.map(variant => ({
-            productId: product.id,
-            variantName: variant.name,
-            image: variant.image,
-            sku: variant.sku,
-            price: variant.price,
-            cost: variant.cost ?? 0,
-            stockQuantity: variant.stockQuantity || 0,
-            attributes: variant.attributes,
-            barcode: variant.barcode,
-            isActive: true,
-          })),
-        });
-
-        // Calculate total stock quantity from variants
-        const totalStock = (data.variants || []).reduce(
-          (sum, variant) => sum + (variant.stockQuantity || 0),
-          0
-        );
-
-        // Update product with total stock
-        await prisma.product.update({
-          where: { id: product.id },
-          data: { stockQuantity: totalStock },
-        });
-      }
-
-      // Create initial stock movement if inventory is tracked
-      if (
-        data.trackInventory !== false &&
-        (data.variants?.length || (product.stockQuantity ?? 0) > 0)
-      ) {
-        await prisma.stockMovement.create({
-          data: {
-            productId: product.id,
-            type: "PURCHASE",
-            quantity: product.stockQuantity ?? 0,
-            unitCost: product.costPrice,
-            totalCost: (product.costPrice ?? 0) * (product.stockQuantity ?? 0),
-            reference: `Initial stock for ${product.productCode}`,
-            userId: session.user.id,
-            businessId,
-          },
-        });
-      }
-
-      // Auto-create journal entry if inventory tracked
-      if (
-        data.trackInventory !== false &&
-        (data.variants?.length || (product.stockQuantity ?? 0) > 0)
-      ) {
-        const inventoryAccountId = "acc-104"; // Inventory Asset
-        const cogsAccountId = "acc-501"; // COGS Account
-
-        const totalStock = (data.variants ?? []).reduce(
-          (sum, variant) => sum + (variant.stockQuantity || 0),
-          0
-        );
-
-        // Get accounts before transaction to reduce DB calls inside
-        const [inventoryAccount, cogsAccount] = await Promise.all([
-          prisma.chartOfAccounts.findFirst({
-            where: {
-              businessId,
-              accountCode: "104",
-              isActive: true,
-              accountType: { name: "Asset" },
-            },
-            select: { id: true },
-          }),
-          prisma.chartOfAccounts.findFirst({
-            where: {
-              businessId,
-              accountCode: "501",
-              isActive: true,
-              accountType: { name: "Expense" },
-            },
-            select: { id: true },
-          }),
-        ]);
-
-        if (!inventoryAccount) throw new Error("Inventory account not found");
-
-        if (!cogsAccount) throw new Error("COGS account not found");
-
-        await autoCreateJournalEntry({
-          transactionDate: new Date(),
-          reference: product.id,
-          description: `Initial inventory setup for ${product.name}`,
-          lines: [
-            {
-              accountId: inventoryAccountId,
-              debitAmount: (data.price ?? 0) * totalStock,
-              creditAmount: 0,
-              description: `Increase inventory asset`,
-            },
-            {
-              accountId: cogsAccountId,
-              debitAmount: 0,
-              creditAmount: (data.cost ?? 0) * totalStock,
-              description: `Initial inventory valuation`,
-            },
-          ],
-        });
-      }
-
-      // Create audit log
-      await prisma.auditLog.create({
-        data: {
+        select: { id: true },
+      }),
+      prisma.chartOfAccounts.findFirst({
+        where: {
           businessId,
-          userId: session.user.id,
-          action: "CREATE",
-          tableName: "Product",
-          recordId: product.id,
-          newValues: JSON.stringify(product),
+          accountCode: "501",
+          isActive: true,
+          accountType: { name: "Expense" },
         },
+        select: { id: true },
+      }),
+    ]);
+
+    if (!inventoryAccount) throw new Error("Inventory account not found");
+
+    if (!cogsAccount) throw new Error("COGS account not found");
+
+    // Create the base product
+    const product = await prisma.product.create({
+      data: {
+        businessId,
+        name: data.name,
+        description: data.description,
+        sku: data.sku,
+        productCode: data.productCode,
+        productType: data.productType,
+        unitOfMeasure: data.unitOfMeasure,
+        sellingPrice: data.price,
+        costPrice: data.cost || 0,
+        trackInventory: data.trackInventory ?? false,
+        maxStockLevel: data.maxStockLevel || 0,
+        defaultTaxTypeId: data.defaultTaxTypeId,
+        categoryId: data.categoryId,
+        reorderLevel: data.reorderLevel || 0,
+        isActive: true,
+        image: data.image ?? null,
+      },
+      include: {
+        category: true,
+        defaultTax: true,
+      },
+    });
+
+    console.log("Created product:", product);
+
+    // Create variants if provided
+    if (data.variants && data.variants.length > 0) {
+      await prisma.productVariant.createMany({
+        data: data.variants.map(variant => ({
+          productId: product.id,
+          variantName: variant.name,
+          image: variant.image,
+          sku: variant.sku,
+          price: variant.price,
+          cost: variant.cost ?? 0,
+          stockQuantity: variant.stockQuantity || 0,
+          attributes: variant.attributes,
+          //barcode: variant.barcode,
+          isActive: true,
+        })),
       });
 
-      //revalidatePath("/inventory");
+      // Calculate total stock quantity from variants
+      // const totalStock = (data.variants || []).reduce(
+      //   (sum, variant) => sum + (variant.stockQuantity || 0),
+      //   0
+      // );
 
-      return {
-        success: true,
-        message: "Product created successfully",
-        data: product,
-      };
+      // Update product with total stock
+      await prisma.product.update({
+        where: { id: product.id },
+        data: { stockQuantity: totalStock },
+      });
+    }
+
+    // Create initial stock movement if inventory is tracked
+    if (
+      data.trackInventory !== false &&
+      (data.variants?.length || (product.stockQuantity ?? 0) > 0)
+    ) {
+      await prisma.stockMovement.create({
+        data: {
+          productId: product.id,
+          type: "PURCHASE",
+          quantity: product.stockQuantity ?? 0,
+          unitCost: product.costPrice,
+          totalCost: (product.costPrice ?? 0) * (product.stockQuantity ?? 0),
+          reference: `Initial stock for ${product.productCode}`,
+          userId: session.user.id,
+          businessId,
+        },
+      });
+    }
+
+    // Auto-create journal entry if inventory tracked
+    if (
+      data.trackInventory !== false &&
+      (data.variants?.length || (product.stockQuantity ?? 0) > 0)
+    ) {
+      await autoCreateJournalEntry({
+        transactionDate: new Date(),
+        reference: product.id,
+        description: `Initial inventory setup for ${product.name}`,
+        lines: [
+          {
+            accountId: inventoryAccount.id,
+            debitAmount: (data.cost ?? 0) * totalStock,
+            creditAmount: 0,
+            description: `Increase inventory asset`,
+          },
+          {
+            accountId: cogsAccount.id,
+            debitAmount: 0,
+            creditAmount: (data.cost ?? 0) * totalStock,
+            description: `Initial inventory valuation`,
+          },
+        ],
+      });
+    }
+
+    // Create audit log
+    await prisma.auditLog.create({
+      data: {
+        businessId,
+        userId: session.user.id,
+        action: "CREATE",
+        tableName: "Product",
+        recordId: product.id,
+        newValues: JSON.stringify(product),
+      },
     });
+
+    //revalidatePath("/inventory");
+
+    return {
+      success: true,
+      message: "Product created successfully",
+      data: product,
+    };
   } catch (error: any) {
     console.error("Error creating product:", error);
     return {

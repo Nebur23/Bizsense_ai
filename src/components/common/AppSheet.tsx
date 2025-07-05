@@ -27,13 +27,13 @@ const AppSheet = ({ businessId }: Props) => {
       color: "bg-blue-500",
       url: `/dashboard/${businessId}/inventory`,
     },
-    {
-      name: "Invoice Generator",
-      description: "Professional Invoice Management",
-      icon: "🧾",
-      color: "bg-orange-500",
-      url: "inventory",
-    },
+    // {
+    //   name: "Invoice Generator",
+    //   description: "Professional Invoice Management",
+    //   icon: "🧾",
+    //   color: "bg-orange-500",
+    //   url: "inventory",
+    // },
   ];
   const financeApps = [
     {
@@ -43,13 +43,13 @@ const AppSheet = ({ businessId }: Props) => {
       color: "bg-green-500",
       url: `/dashboard/${businessId}/Finance/accounting`,
     },
-    {
-      name: "Financial Reports",
-      description: "Advanced Financial Reporting Tools",
-      icon: "📈",
-      color: "bg-purple-500",
-      url: "inventory",
-    },
+    // {
+    //   name: "Financial Reports",
+    //   description: "Advanced Financial Reporting Tools",
+    //   icon: "📈",
+    //   color: "bg-purple-500",
+    //   url: "inventory",
+    // },
   ];
 
   const apps = segments.includes("Finance")
