@@ -45,7 +45,7 @@ export async function createTransaction(data: Transaction) {
           description: data.description,
           categoryId: data.categoryId || null,
           date: data.date,
-          customerId: data.customerId || null,
+          //customerId: data.customerId || null,
           businessId,
         },
       });
